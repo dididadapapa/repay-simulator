@@ -35,7 +35,7 @@
 
 # 借贷模拟器
 
-![截图](screenshot.png)
+![截图](creenshot.png)
 
 ## 怎么做的
 
