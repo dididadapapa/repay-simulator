@@ -20,7 +20,7 @@
 
 ## 使用
 
-直接打开：https://你的用户名.github.io/repay-simulator/
+直接打开：https://dididadapapa.github.io/repay-simulator/
 
 数据存在浏览器本地，不上传服务器。换设备数据不互通。
 
