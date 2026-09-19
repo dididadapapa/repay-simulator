@@ -3,17 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>还款压力储蓄器</title>
+<title>借贷模拟器</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #f5f7fa; color: #333;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
     padding: 20px;
   }
+
+  .overdue-banner {
+    width: 100%;
+    max-width: 760px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #fdf3e0;
+    color: #d98c2c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    transition: background 0.3s, color 0.3s;
+    font-weight: 500;
+  }
+  .overdue-banner.severe {
+    background: #c0392b;
+    color: #fff;
+    animation: pulseBanner 2s ease-in-out infinite;
+  }
+  @keyframes pulseBanner {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+  .overdue-banner .ob-text { font-variant-numeric: tabular-nums; }
+  .overdue-banner .ob-text b { font-weight: 700; }
+  .overdue-banner .ob-close {
+    background: rgba(0,0,0,0.1);
+    border: none;
+    color: inherit;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    flex: 0 0 auto;
+    transition: background 0.15s;
+  }
+  .overdue-banner .ob-close:hover { background: rgba(0,0,0,0.2); }
 
   .app {
     display: flex;
@@ -23,7 +69,6 @@
     align-items: flex-start;
   }
 
-  /* ===== 侧边栏 ===== */
   .sidebar {
     flex: 0 0 170px;
     display: flex;
@@ -119,6 +164,32 @@
     cursor: not-allowed;
   }
 
+  .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    flex: 0 0 auto;
+  }
+  .btn-data {
+    padding: 8px 10px;
+    background: transparent;
+    border: 1px solid #d0e2f5;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #4a90d9;
+    text-align: center;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-data:hover {
+    background: #e8f1fb;
+    border-color: #4a90d9;
+  }
+
   .btn-delete-all {
     padding: 8px 10px;
     background: transparent;
@@ -130,8 +201,6 @@
     text-align: center;
     transition: all 0.15s;
     font-family: inherit;
-    flex: 0 0 auto;
-    margin-top: 4px;
   }
   .btn-delete-all:hover {
     background: #fde8e8;
@@ -144,7 +213,6 @@
     background: transparent;
   }
 
-  /* ===== 主区域 ===== */
   .main-area {
     flex: 1;
     min-width: 0;
@@ -183,11 +251,89 @@
   .contract-title .title-edit:hover { background: #eef4fb; color: #4a90d9; }
   .contract-title .title-delete:hover { background: #fde8e8; color: #d94a4a; }
 
+  .completion-view { padding: 20px 0 40px; }
+  .completion-check {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e8f8ee;
+    color: #27ae60;
+    font-size: 36px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    line-height: 1;
+  }
+  .completion-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #27ae60;
+    margin-bottom: 26px;
+  }
+  .completion-stats {
+    max-width: 320px;
+    margin: 0 auto 20px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { font-size: 13px; color: #888; }
+  .stat-value { font-size: 18px; font-weight: 700; color: #4a90d9; }
+  .completion-compare {
+    font-size: 14px;
+    color: #d98c2c;
+    margin: 18px 0 22px;
+    font-weight: 500;
+    min-height: 20px;
+  }
+  .btn-view-history {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid #d0e2f5;
+    border-radius: 16px;
+    color: #4a90d9;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    margin-bottom: 24px;
+  }
+  .btn-view-history:hover {
+    background: #e8f1fb;
+    border-color: #4a90d9;
+  }
+  .completion-message {
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    margin-top: 6px;
+    font-size: 15px;
+    color: #555;
+    line-height: 2;
+  }
+  .completion-message b {
+    color: #4a90d9;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .completion-history {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+  }
+
   .label { font-size: 18px; color: #666; margin-bottom: 8px; }
   .big-number {
     font-size: 48px; font-weight: 700; color: #4a90d9;
     background: #e8f1fb; padding: 20px; border-radius: 12px;
-    margin-bottom: 20px; word-break: break-all;
+    margin-bottom: 14px; word-break: break-all;
     transition: color 0.3s, background 0.3s, font-size 0.2s;
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
@@ -196,6 +342,32 @@
   .big-number.tiny  { font-size: 30px; }
   .big-number.danger { color: #d94a4a; background: #fde8e8; }
   .big-number.done { color: #27ae60; background: #e8f8ee; }
+
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-bar {
+    height: 6px;
+    background: #e8eef5;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #4a90d9;
+    border-radius: 3px;
+    transition: width 0.4s;
+    width: 0;
+  }
+  .progress-fill.done { background: #27ae60; }
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-text b { color: #4a90d9; font-weight: 600; }
+  .progress-text b.done { color: #27ae60; }
 
   .month-row { display: flex; gap: 12px; margin-bottom: 10px; }
   .month-cell { flex: 1; text-align: center; }
@@ -229,10 +401,9 @@
   .countdown-card .cd-days small { font-size: 16px; font-weight: 500; margin-left: 4px; }
   .countdown-card .cd-date { font-size: 12px; margin-top: 4px; opacity: 0.85; }
 
-  .hint { font-size: 14px; color: #999; margin-bottom: 16px; line-height: 1.6; }
+  .hint { font-size: 14px; color: #999; margin-bottom: 16px; line-height: 1.6; min-height: 20px; }
 
-  /* 还款输入区（带加减按钮） */
-  .deposit-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .deposit-row { display: flex; gap: 8px; margin-bottom: 6px; }
   .deposit-input-group {
     flex: 1;
     display: flex;
@@ -294,17 +465,72 @@
   .deposit-row .btn-pay:hover { background: #3a7bc8; }
   .deposit-row .btn-pay:active { transform: scale(0.98); }
 
-  .footer { margin-top: 30px; font-size: 13px; color: #aaa; text-align: center; }
-  .footer .savings { color: #4a90d9; font-weight: 600; font-size: 15px; }
+  .fill-min-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    min-height: 20px;
+    font-size: 12px;
+    color: #999;
+  }
+  .fill-min-row .fill-min-text b {
+    color: #4a90d9;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .btn-fill-min {
+    padding: 3px 10px;
+    background: #eef4fb;
+    border: 1px solid #d0e2f5;
+    border-radius: 12px;
+    color: #4a90d9;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-fill-min:hover {
+    background: #dce9f6;
+    border-color: #4a90d9;
+  }
+  .btn-fill-min:active { background: #c8dff5; }
 
-  .history { margin-top: 30px; width: 100%; }
+  /* 提前还清按钮 */
+  .early-payoff-row {
+    margin-top: 24px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-early-payoff {
+    padding: 7px 18px;
+    background: transparent;
+    border: 1px dashed #d0e2f5;
+    border-radius: 16px;
+    color: #4a90d9;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-early-payoff:hover {
+    background: #e8f1fb;
+    border-color: #4a90d9;
+  }
+  .btn-early-payoff:active {
+    background: #dce9f6;
+  }
+
+  .history { margin-top: 24px; width: 100%; }
   .history h3 { font-size: 14px; color: #999; margin-bottom: 10px; font-weight: 500; }
   .history-item {
     display: flex; justify-content: space-between;
     font-size: 13px; color: #777; padding: 8px 0; border-bottom: 1px solid #eee;
   }
 
-  /* ===== 弹窗 ===== */
   .modal-mask {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100;
@@ -368,12 +594,51 @@
   .amount-input-group .btn-step.minus { border-right: 1px solid #ddd; }
   .amount-input-group .btn-step.plus { border-left: 1px solid #ddd; }
 
-  .amount-hint {
-    font-size: 12px;
-    color: #aaa;
-    text-align: right;
-    margin-top: 4px;
+  .amount-input-group.readonly { background: #f5f7fa; }
+  .amount-input-group.readonly input { background: transparent; color: #888; cursor: default; }
+  .amount-input-group.readonly .btn-step { background: #f5f7fa; color: #ccc; cursor: not-allowed; }
+
+  .mode-toggle {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
   }
+  .mode-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    color: #666;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mode-btn:not(:last-child) { border-right: 1px solid #ddd; }
+  .mode-btn.active { background: #4a90d9; color: #fff; }
+  .mode-btn:hover:not(.active) { background: #f0f5fb; }
+
+  .quick-terms { margin-top: 12px; }
+  .quick-terms-label { font-size: 12px; color: #999; margin-bottom: 6px; }
+  .quick-terms-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .term-chip {
+    padding: 5px 10px;
+    background: #f0f5fb;
+    border: 1px solid #d0e2f5;
+    border-radius: 14px;
+    font-size: 12px;
+    color: #4a90d9;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    user-select: none;
+    line-height: 1.3;
+  }
+  .term-chip:hover { background: #e0eaf5; border-color: #4a90d9; }
+  .term-chip:active { background: #d0e2f5; }
+
+  .amount-hint { font-size: 12px; color: #aaa; text-align: right; margin-top: 4px; }
 
   .calc-preview {
     margin-top: 16px; padding: 14px; background: #e8f1fb;
@@ -389,7 +654,6 @@
   .btn-confirm { background: #4a90d9; color: #fff; }
   .btn-cancel { background: #eee; color: #666; }
 
-  /* ===== 移动端 ===== */
   @media (max-width: 620px) {
     body { padding: 12px; }
     .app { flex-direction: column; }
@@ -401,7 +665,7 @@
     .sidebar-title { width: 100%; }
     .contract-item, .btn-new-contract { flex: 1 1 45%; }
     .contract-edit, .contract-delete { opacity: 1; }
-    .btn-delete-all { flex: 0 0 100%; }
+    .sidebar-footer { flex: 0 0 100%; }
     .big-number { font-size: 36px; padding: 16px; }
     .big-number.small { font-size: 30px; }
     .big-number.tiny  { font-size: 24px; }
@@ -412,6 +676,11 @@
 </head>
 <body>
 
+<div class="overdue-banner" id="overdueBanner" style="display:none;">
+  <span class="ob-text" id="overdueText"></span>
+  <button class="ob-close" onclick="dismissOverdueBanner()" title="关闭">×</button>
+</div>
+
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-title">合同</div>
@@ -419,9 +688,14 @@
     <button class="btn-new-contract" id="newContractBtn" onclick="newContract()">
       + 新建合同
     </button>
-    <button class="btn-delete-all" id="deleteAllBtn" onclick="deleteAllContracts()">
-      清空全部合同
-    </button>
+
+    <div class="sidebar-footer">
+      <button class="btn-data" onclick="exportData()">导出数据</button>
+      <button class="btn-data" onclick="importData()">导入数据</button>
+      <button class="btn-delete-all" id="deleteAllBtn" onclick="deleteAllContracts()">
+        清空全部合同
+      </button>
+    </div>
   </aside>
 
   <main class="main-area">
@@ -432,12 +706,22 @@
     <div id="contractView" style="display:none;">
       <div class="contract-title">
         <span id="contractTitle">合同一</span>
-        <span class="title-edit" onclick="renameActive()">✎ 重命名</span>
+        <span class="title-edit" onclick="editContract()">✎ 编辑</span>
         <span class="title-delete" onclick="deleteActive()">✕ 删除</span>
       </div>
 
       <div class="label">等待还款金额：</div>
       <div class="big-number" id="totalDebt">--</div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span>已还 <b id="progressPaid">0</b></span>
+          <span id="progressPercent">0%</span>
+        </div>
+      </div>
 
       <div class="month-row">
         <div class="month-cell">
@@ -471,8 +755,10 @@
         <button class="btn-pay" onclick="deposit()">还款</button>
       </div>
 
-      <div class="footer">
-        本契约已在现实中真实存下：<span class="savings" id="actualSavings">0</span> 元
+      <div class="fill-min-row" id="fillMinRow"></div>
+
+      <div class="early-payoff-row" id="earlyPayoffRow">
+        <button type="button" class="btn-early-payoff" onclick="payOffAll()">提前还清剩余债务</button>
       </div>
 
       <div class="history" id="historyBox" style="display:none;">
@@ -480,24 +766,95 @@
         <div id="historyList"></div>
       </div>
     </div>
+
+    <div id="completionView" class="completion-view" style="display:none;">
+      <div class="completion-check">✓</div>
+      <div class="completion-title">恭喜还完</div>
+
+      <div class="completion-stats">
+        <div class="stat-row">
+          <span class="stat-label">总还款</span>
+          <span class="stat-value" id="compTotal">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">实际耗时</span>
+          <span class="stat-value" id="compDuration">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">平均每月</span>
+          <span class="stat-value" id="compAverage">0</span>
+        </div>
+      </div>
+
+      <div class="completion-compare" id="compCompare"></div>
+
+      <button class="btn-view-history" id="compHistoryBtn" onclick="toggleCompletionHistory()">
+        查看存款记录
+      </button>
+
+      <div class="completion-history" id="compHistoryBox" style="display:none;">
+        <div id="compHistoryList"></div>
+      </div>
+
+      <div class="completion-message">
+        <div>你实际可是存了 <b id="compSaved">0</b>，你是最棒的</div>
+        <div>你打算怎么花呢？</div>
+      </div>
+    </div>
   </main>
 </div>
+
+<input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="handleImportFile(event)">
 
 <div class="modal-mask" id="setupModal">
   <div class="modal">
     <h2 id="modalTitle">新建契约</h2>
     <label>合同名称</label>
     <input type="text" id="inputName" placeholder="例如 房贷、车贷" maxlength="20">
-    <label>总贷款金额（元）</label>
-    <div class="amount-input-group">
-      <button type="button" class="btn-step minus" onclick="stepAmount(-1000)">−</button>
+
+    <label id="labelAmount">总贷款金额（元）</label>
+    <div class="amount-input-group" id="groupAmount">
+      <button type="button" class="btn-step minus" id="btnAmountMinus" onclick="stepAmount(-1000)">−</button>
       <input type="number" id="inputAmount" placeholder="例如 50000" value="50000"
              step="1000" oninput="previewCalc()">
-      <button type="button" class="btn-step plus" onclick="stepAmount(1000)">+</button>
+      <button type="button" class="btn-step plus" id="btnAmountPlus" onclick="stepAmount(1000)">+</button>
     </div>
-    <div class="amount-hint">每次 ±1000</div>
+    <div class="amount-hint" id="amountHint">每次 ±1000</div>
+
+    <label>计算方式</label>
+    <div class="mode-toggle">
+      <button type="button" id="modeBtnPeriods" class="mode-btn active" onclick="setCalcMode('periods')">按期限算</button>
+      <button type="button" id="modeBtnMonthly" class="mode-btn" onclick="setCalcMode('monthly')">按月供算</button>
+    </div>
+
     <label>还款期限（月）</label>
-    <input type="number" id="inputPeriods" placeholder="例如 24" value="24" oninput="previewCalc()">
+    <div class="amount-input-group" id="groupPeriods">
+      <input type="number" id="inputPeriods" placeholder="例如 24" value="24"
+             oninput="previewCalc()">
+    </div>
+
+    <label>每月还款额（元）</label>
+    <div class="amount-input-group readonly" id="groupMonthly">
+      <input type="number" id="inputMonthly" placeholder="按期限自动算出"
+             readonly oninput="previewCalc()">
+    </div>
+
+    <div class="quick-terms" id="quickTermsBlock">
+      <div class="quick-terms-label">快捷期限</div>
+      <div class="quick-terms-chips">
+        <button type="button" class="term-chip" onclick="setQuickTerm(12)">1年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(24)">2年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(36)">3年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(48)">4年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(60)">5年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(72)">6年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(84)">7年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(96)">8年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(108)">9年</button>
+        <button type="button" class="term-chip" onclick="setQuickTerm(120)">10年</button>
+      </div>
+    </div>
+
     <label>每月还款日</label>
     <select id="inputDueDay" onchange="previewCalc()">
       <option value="5">每月 5 号</option>
@@ -507,16 +864,19 @@
       <option value="23">每月 23 号</option>
       <option value="27">每月 27 号</option>
     </select>
+
     <div class="calc-preview" id="calcPreview"></div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSetup()">取消</button>
-      <button class="btn-confirm" onclick="saveSetup()">开始契约</button>
+      <button class="btn-confirm" id="btnModalConfirm" onclick="saveSetup()">开始契约</button>
     </div>
   </div>
 </div>
 
 <script>
-const STORAGE_KEY = 'repay_savings_state_v15';
+const STORAGE_KEY = 'repay_savings_state_v20';
+const OVERDUE_BANNER_KEY = 'repay_overdue_dismissed_session';
 const MAX_CONTRACTS = 10;
 const DEFAULT_NAMES = [
   '合同一', '合同二', '合同三', '合同四', '合同五',
@@ -529,8 +889,10 @@ let appState = {
 };
 
 let setupTargetIdx = null;
+let calcMode = 'periods';
+let isEditMode = false;
+let completionHistoryOpen = false;
 
-// ===== 持久化 =====
 function saveAppState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
 }
@@ -547,7 +909,6 @@ function loadAppState() {
   } catch (e) {}
 }
 
-// ===== 数字格式化：千位分隔符 =====
 function formatMoney(n) {
   n = Math.round(Number(n) || 0);
   const sign = n < 0 ? '-' : '';
@@ -555,7 +916,15 @@ function formatMoney(n) {
   return sign + abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-// ===== 工具 =====
+function formatDuration(periods) {
+  periods = Number(periods) || 0;
+  if (periods < 12) return `${periods} 个月`;
+  const years = Math.floor(periods / 12);
+  const months = periods % 12;
+  if (months === 0) return `${years} 年`;
+  return `约 ${years} 年 ${months} 个月`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -591,8 +960,21 @@ function advanceDueDate(dueDateStr, dueDay) {
   d.setMonth(d.getMonth() + 1);
   return new Date(d.getFullYear(), d.getMonth(), dueDay);
 }
+function calcMonthsBetween(startISO, endISO) {
+  if (!startISO || !endISO) return 1;
+  const s = fromISODate(startISO);
+  const e = fromISODate(endISO);
+  let months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+  if (e.getDate() >= s.getDate()) months += 0;
+  else months -= 1;
+  return Math.max(1, months);
+}
+function getContractStart(c) {
+  if (c.createdAt) return c.createdAt;
+  if (c.history && c.history.length) return c.history[0].date;
+  return toISODate(new Date());
+}
 
-// ===== 到期自动结算 =====
 function settleDuePeriods(c) {
   if (!c || !c.isSet || c.totalDebt <= 0 || !c.nextDueDate) return false;
 
@@ -630,8 +1012,7 @@ function settleAll() {
   if (changed) saveAppState();
 }
 
-// ===== 月供计算 =====
-function calcMonthly(amount, periods) {
+function calcByPeriods(amount, periods) {
   if (!amount || !periods || amount <= 0 || periods <= 0) return null;
   let monthly = Math.ceil(amount / periods / 100) * 100;
   if (monthly <= 0) monthly = amount / periods;
@@ -643,7 +1024,41 @@ function calcMonthly(amount, periods) {
   return { monthly, periods, lastAmount };
 }
 
+function calcByMonthly(amount, monthly) {
+  if (!amount || !monthly || amount <= 0 || monthly <= 0) return null;
+  const periods = Math.ceil(amount / monthly);
+  const lastAmount = amount - monthly * (periods - 1);
+  return { monthly, periods, lastAmount };
+}
+
+function setCalcMode(mode) {
+  calcMode = mode;
+
+  const periodsInput = document.getElementById('inputPeriods');
+  const monthlyInput = document.getElementById('inputMonthly');
+  const groupPeriods = document.getElementById('groupPeriods');
+  const groupMonthly = document.getElementById('groupMonthly');
+
+  document.getElementById('modeBtnPeriods').classList.toggle('active', mode === 'periods');
+  document.getElementById('modeBtnMonthly').classList.toggle('active', mode === 'monthly');
+
+  if (mode === 'periods') {
+    periodsInput.readOnly = false;
+    monthlyInput.readOnly = true;
+    groupPeriods.classList.remove('readonly');
+    groupMonthly.classList.add('readonly');
+  } else {
+    periodsInput.readOnly = true;
+    monthlyInput.readOnly = false;
+    groupPeriods.classList.add('readonly');
+    groupMonthly.classList.remove('readonly');
+  }
+
+  previewCalc();
+}
+
 function stepAmount(delta) {
+  if (isEditMode) return;
   const input = document.getElementById('inputAmount');
   let val = Number(input.value) || 0;
   val = Math.max(0, val + delta);
@@ -658,18 +1073,65 @@ function stepDeposit(delta) {
   input.value = val;
 }
 
+function fillMin() {
+  const idx = appState.activeIdx;
+  const c = appState.contracts[idx];
+  if (!c || !c.isSet || c.totalDebt <= 0) return;
+
+  const required = Math.min(c.baseMonthly + c.arrears, c.totalDebt);
+  const gap = required - c.monthlyPaid;
+  if (gap <= 0) return;
+
+  document.getElementById('depositAmount').value = gap;
+  document.getElementById('depositAmount').focus();
+}
+
+function setQuickTerm(months) {
+  const amount = Number(document.getElementById('inputAmount').value);
+  if (!amount || amount <= 0) {
+    alert('请先填写总贷款金额');
+    return;
+  }
+  const r = calcByPeriods(amount, months);
+  if (!r) return;
+
+  document.getElementById('inputPeriods').value = r.periods;
+  document.getElementById('inputMonthly').value = r.monthly;
+  previewCalc();
+}
+
 function previewCalc() {
   const amount = Number(document.getElementById('inputAmount').value);
-  const periods = Number(document.getElementById('inputPeriods').value);
+  const periodsInput = document.getElementById('inputPeriods');
+  const monthlyInput = document.getElementById('inputMonthly');
   const dueDay = Number(document.getElementById('inputDueDay').value);
   const preview = document.getElementById('calcPreview');
 
-  const r = calcMonthly(amount, periods);
+  if (!amount || amount <= 0) {
+    if (calcMode === 'periods') monthlyInput.value = '';
+    else periodsInput.value = '';
+    preview.innerHTML = '';
+    return;
+  }
+
+  let r;
+  if (calcMode === 'periods') {
+    const periods = Number(periodsInput.value);
+    if (!periods || periods <= 0) { monthlyInput.value = ''; preview.innerHTML = ''; return; }
+    r = calcByPeriods(amount, periods);
+    if (r) monthlyInput.value = r.monthly;
+  } else {
+    const monthly = Number(monthlyInput.value);
+    if (!monthly || monthly <= 0) { periodsInput.value = ''; preview.innerHTML = ''; return; }
+    r = calcByMonthly(amount, monthly);
+    if (r) periodsInput.value = r.periods;
+  }
+
   if (!r) { preview.innerHTML = ''; return; }
 
-  let text = `每月最低还 <b>${formatMoney(r.monthly)}</b> 元，共 ${r.periods} 期`;
+  let text = `每月还 <b>${formatMoney(r.monthly)}</b> 元，共 ${r.periods} 期 · ${formatDuration(r.periods)}`;
   if (r.lastAmount !== r.monthly) {
-    text += `<br>（最后一期 ${formatMoney(r.lastAmount)} 元）`;
+    text += `<br>最后一期还 <b>${formatMoney(r.lastAmount)}</b> 元`;
   }
   const next = getNextDueDateFromToday(dueDay);
   const days = daysBetween(new Date(), next);
@@ -677,7 +1139,6 @@ function previewCalc() {
   preview.innerHTML = text;
 }
 
-// ===== 侧边栏渲染 =====
 function renderSidebar() {
   const list = document.getElementById('contractList');
   list.innerHTML = '';
@@ -715,6 +1176,7 @@ function renderSidebar() {
         return;
       }
       appState.activeIdx = i;
+      completionHistoryOpen = false;
       saveAppState();
       render();
     });
@@ -733,35 +1195,122 @@ function renderSidebar() {
   delAllBtn.disabled = appState.contracts.length === 0;
 }
 
-// ===== 主区域渲染 =====
+function dismissOverdueBanner() {
+  document.getElementById('overdueBanner').style.display = 'none';
+  sessionStorage.setItem(OVERDUE_BANNER_KEY, '1');
+}
+
+function renderOverdueBanner(c) {
+  const banner = document.getElementById('overdueBanner');
+  const textEl = document.getElementById('overdueText');
+
+  if (!c || !c.isSet || c.totalDebt <= 0 || !c.arrears || c.arrears <= 0) {
+    banner.style.display = 'none';
+    return;
+  }
+  if (sessionStorage.getItem(OVERDUE_BANNER_KEY) === '1') {
+    banner.style.display = 'none';
+    return;
+  }
+
+  const severe = c.arrears > c.baseMonthly;
+  banner.classList.toggle('severe', severe);
+
+  textEl.innerHTML = severe
+    ? `⚠ 已累积未还 <b>${formatMoney(c.arrears)}</b> 元 · 本期最低 <b>${formatMoney(Math.min(c.baseMonthly + c.arrears, c.totalDebt))}</b> 元`
+    : `⚠ 上期还差 <b>${formatMoney(c.arrears)}</b> 元 · 已累加到本期`;
+
+  banner.style.display = 'flex';
+}
+
+function renderCompletion(c) {
+  const compView = document.getElementById('completionView');
+  const mainView = document.getElementById('contractView');
+
+  mainView.style.display = 'none';
+  compView.style.display = 'block';
+
+  const total = c.actualSavings || 0;
+  const start = getContractStart(c);
+  const last = (c.history && c.history.length) ? c.history[c.history.length - 1].date : toISODate(new Date());
+  const months = calcMonthsBetween(start, last);
+  const avg = months > 0 ? Math.round(total / months) : total;
+
+  document.getElementById('compTotal').textContent = formatMoney(total) + ' 元';
+  document.getElementById('compDuration').textContent = months + ' 个月';
+  document.getElementById('compAverage').textContent = formatMoney(avg) + ' 元';
+  document.getElementById('compSaved').textContent = formatMoney(total) + ' 元';
+
+  const expected = c.totalPeriods || 0;
+  const compareEl = document.getElementById('compCompare');
+  if (!expected || expected <= 0) {
+    compareEl.textContent = '';
+  } else if (months < expected - 1) {
+    compareEl.textContent = `比预期提前 ${expected - months} 个月`;
+  } else if (months > expected + 1) {
+    compareEl.textContent = `比预期晚了 ${months - expected} 个月`;
+  } else {
+    compareEl.textContent = '按计划完成';
+  }
+
+  const box = document.getElementById('compHistoryBox');
+  box.style.display = completionHistoryOpen ? 'block' : 'none';
+  document.getElementById('compHistoryBtn').textContent =
+    completionHistoryOpen ? '收起存款记录' : '查看存款记录';
+  if (completionHistoryOpen) {
+    renderHistory(document.getElementById('compHistoryList'), c.history);
+  }
+}
+
+function toggleCompletionHistory() {
+  completionHistoryOpen = !completionHistoryOpen;
+  const idx = appState.activeIdx;
+  const c = appState.contracts[idx];
+  if (c) renderCompletion(c);
+}
+
 function renderMain() {
   const idx = appState.activeIdx;
   const c = appState.contracts[idx];
 
   const emptyEl = document.getElementById('emptyState');
-  const view = document.getElementById('contractView');
+  const mainView = document.getElementById('contractView');
+  const compView = document.getElementById('completionView');
 
   if (!c || !c.isSet) {
     emptyEl.style.display = 'block';
-    view.style.display = 'none';
+    mainView.style.display = 'none';
+    compView.style.display = 'none';
+    renderOverdueBanner(null);
     return;
   }
 
   emptyEl.style.display = 'none';
-  view.style.display = 'block';
-
   document.getElementById('contractTitle').textContent = c.name;
 
+  if (c.totalDebt <= 0) {
+    renderCompletion(c);
+    renderOverdueBanner(null);
+    return;
+  }
+
+  compView.style.display = 'none';
+  mainView.style.display = 'block';
+  renderOverdueBanner(c);
+
   const totalEl = document.getElementById('totalDebt');
+  const progressFill = document.getElementById('progressFill');
+  const progressPaid = document.getElementById('progressPaid');
+  const progressPercent = document.getElementById('progressPercent');
   const minEl = document.getElementById('monthlyMin');
   const paidEl = document.getElementById('monthlyPaid');
   const arrearsTip = document.getElementById('arrearsTip');
-  const savingsEl = document.getElementById('actualSavings');
   const hintEl = document.getElementById('hint');
   const cdCard = document.getElementById('countdownCard');
   const cdDays = document.getElementById('cdDays');
   const cdDate = document.getElementById('cdDate');
   const depositRow = document.getElementById('depositRow');
+  const fillMinRow = document.getElementById('fillMinRow');
   const historyBox = document.getElementById('historyBox');
   const historyList = document.getElementById('historyList');
 
@@ -771,26 +1320,13 @@ function renderMain() {
     else if (text.length > 8) el.classList.add('small');
   }
 
-  if (c.totalDebt <= 0) {
-    totalEl.textContent = '已还清';
-    totalEl.classList.remove('small', 'tiny');
-    totalEl.classList.remove('danger');
-    totalEl.classList.add('done');
-    minEl.textContent = '0';
-    paidEl.textContent = formatMoney(c.monthlyPaid);
-    arrearsTip.textContent = '';
-    hintEl.innerHTML = `🎉 恭喜！这个契约你在现实中真实存下了 <b>${formatMoney(c.actualSavings)}</b> 元。`;
-    cdCard.style.display = 'none';
-    depositRow.style.display = 'none';
-    savingsEl.textContent = formatMoney(c.actualSavings);
-    renderHistory(historyList, c.history);
-    historyBox.style.display = c.history.length ? 'block' : 'none';
-    return;
-  }
-
-  totalEl.classList.remove('done');
-  cdCard.style.display = 'block';
-  depositRow.style.display = 'flex';
+  const paid = c.actualSavings || 0;
+  const remain = c.totalDebt || 0;
+  const total = paid + remain;
+  const percent = total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0;
+  progressFill.style.width = percent + '%';
+  progressPaid.textContent = formatMoney(paid);
+  progressPercent.textContent = percent + '%';
 
   const required = Math.min(c.baseMonthly + c.arrears, c.totalDebt);
   const gap = required - c.monthlyPaid;
@@ -798,10 +1334,10 @@ function renderMain() {
   const totalText = formatMoney(c.totalDebt);
   totalEl.textContent = totalText;
   applySizeClass(totalEl, totalText);
+  totalEl.classList.remove('done', 'danger');
 
   minEl.textContent = formatMoney(required);
   paidEl.textContent = formatMoney(c.monthlyPaid);
-  savingsEl.textContent = formatMoney(c.actualSavings);
 
   if (c.arrears > 0) {
     arrearsTip.innerHTML = `本期最低含上期未还累积 <b>${formatMoney(c.arrears)}</b>`;
@@ -813,11 +1349,19 @@ function renderMain() {
     hintEl.innerHTML = `本期已还够，多出的 <b>${formatMoney(-gap)}</b> 元将滚入下期。`;
     paidEl.classList.add('paid');
     paidEl.classList.remove('warn');
+    fillMinRow.innerHTML = '';
+    fillMinRow.style.display = 'none';
   } else {
-    hintEl.innerHTML = `请先在现实中向储蓄卡存入 <b>${formatMoney(gap)}</b> 元，再回来点击“还款”。`;
+    hintEl.innerHTML = '';
     paidEl.classList.remove('paid');
     if (c.arrears > 0) paidEl.classList.add('warn');
     else paidEl.classList.remove('warn');
+
+    fillMinRow.innerHTML = `
+      <span class="fill-min-text">还差 <b>${formatMoney(gap)}</b> 元</span>
+      <button type="button" class="btn-fill-min" onclick="fillMin()">填入</button>
+    `;
+    fillMinRow.style.display = 'flex';
   }
 
   if (c.nextDueDate) {
@@ -848,6 +1392,7 @@ function renderMain() {
 }
 
 function renderHistory(container, history) {
+  if (!container) return;
   if (!history || !history.length) { container.innerHTML = ''; return; }
   container.innerHTML = history.slice().reverse()
     .map(h => `<div class="history-item"><span>${h.date}</span><span>- ${formatMoney(h.amount)} 元</span></div>`)
@@ -860,18 +1405,71 @@ function render() {
   renderMain();
 }
 
-// ===== 新建合同 =====
 function newContract() {
   if (appState.contracts.length >= MAX_CONTRACTS) return;
 
   const idx = appState.contracts.length;
   setupTargetIdx = idx;
+  isEditMode = false;
 
   document.getElementById('modalTitle').textContent = '新建契约';
+  document.getElementById('btnModalConfirm').textContent = '开始契约';
   document.getElementById('inputName').value = DEFAULT_NAMES[idx] || '新合同';
+  document.getElementById('labelAmount').textContent = '总贷款金额（元）';
+  document.getElementById('groupAmount').classList.remove('readonly');
   document.getElementById('inputAmount').value = 50000;
+  document.getElementById('inputAmount').readOnly = false;
+  document.getElementById('amountHint').textContent = '每次 ±1000';
+  document.getElementById('quickTermsBlock').style.display = 'block';
+
   document.getElementById('inputPeriods').value = 24;
+  document.getElementById('inputMonthly').value = '';
   document.getElementById('inputDueDay').value = 18;
+
+  calcMode = 'periods';
+  document.getElementById('modeBtnPeriods').classList.add('active');
+  document.getElementById('modeBtnMonthly').classList.remove('active');
+  document.getElementById('inputPeriods').readOnly = false;
+  document.getElementById('inputMonthly').readOnly = true;
+  document.getElementById('groupPeriods').classList.remove('readonly');
+  document.getElementById('groupMonthly').classList.add('readonly');
+
+  document.getElementById('setupModal').classList.add('active');
+  previewCalc();
+}
+
+function editContract() {
+  const idx = appState.activeIdx;
+  const c = appState.contracts[idx];
+  if (!c || !c.isSet || c.totalDebt <= 0) return;
+
+  setupTargetIdx = idx;
+  isEditMode = true;
+
+  document.getElementById('modalTitle').textContent = '编辑合同';
+  document.getElementById('btnModalConfirm').textContent = '保存修改';
+  document.getElementById('inputName').value = c.name;
+
+  document.getElementById('labelAmount').textContent = '剩余债务（元，不可改）';
+  document.getElementById('groupAmount').classList.add('readonly');
+  document.getElementById('inputAmount').value = c.totalDebt;
+  document.getElementById('inputAmount').readOnly = true;
+  document.getElementById('amountHint').textContent = '剩余债务由已还款情况决定，不可修改';
+  document.getElementById('quickTermsBlock').style.display = 'block';
+
+  document.getElementById('inputDueDay').value = String(c.dueDay || 18);
+
+  const remainPeriods = Math.max(1, Math.ceil(c.totalDebt / c.baseMonthly));
+  document.getElementById('inputPeriods').value = remainPeriods;
+  document.getElementById('inputMonthly').value = c.baseMonthly;
+
+  calcMode = 'periods';
+  document.getElementById('modeBtnPeriods').classList.add('active');
+  document.getElementById('modeBtnMonthly').classList.remove('active');
+  document.getElementById('inputPeriods').readOnly = false;
+  document.getElementById('inputMonthly').readOnly = true;
+  document.getElementById('groupPeriods').classList.remove('readonly');
+  document.getElementById('groupMonthly').classList.add('readonly');
 
   document.getElementById('setupModal').classList.add('active');
   previewCalc();
@@ -880,6 +1478,7 @@ function newContract() {
 function closeSetup() {
   document.getElementById('setupModal').classList.remove('active');
   setupTargetIdx = null;
+  isEditMode = false;
 }
 
 function saveSetup() {
@@ -888,43 +1487,74 @@ function saveSetup() {
   const nameInput = document.getElementById('inputName').value.trim();
   const name = (nameInput || DEFAULT_NAMES[setupTargetIdx] || '新合同').slice(0, 20);
   const amount = Number(document.getElementById('inputAmount').value);
-  const periods = Number(document.getElementById('inputPeriods').value);
   const dueDay = Number(document.getElementById('inputDueDay').value);
 
   if (!amount || amount <= 0) { alert('请输入有效的贷款金额'); return; }
-  if (!periods || periods <= 0) { alert('请输入有效的还款期限'); return; }
   if (!dueDay) { alert('请选择每月还款日'); return; }
 
-  const r = calcMonthly(amount, periods);
-
-  const contract = {
-    name: name,
-    totalDebt: amount,
-    baseMonthly: r.monthly,
-    actualSavings: 0,
-    monthlyPaid: 0,
-    arrears: 0,
-    totalPeriods: r.periods,
-    dueDay: dueDay,
-    nextDueDate: toISODate(getNextDueDateFromToday(dueDay)),
-    history: [],
-    isSet: true
-  };
-
-  if (setupTargetIdx < appState.contracts.length) {
-    appState.contracts[setupTargetIdx] = contract;
+  let r;
+  if (calcMode === 'periods') {
+    const periods = Number(document.getElementById('inputPeriods').value);
+    if (!periods || periods <= 0) { alert('请输入有效的还款期限'); return; }
+    r = calcByPeriods(amount, periods);
   } else {
-    appState.contracts.push(contract);
+    const monthly = Number(document.getElementById('inputMonthly').value);
+    if (!monthly || monthly <= 0) { alert('请输入有效的每月还款额'); return; }
+    r = calcByMonthly(amount, monthly);
   }
 
-  appState.activeIdx = setupTargetIdx;
+  if (!r) { alert('计算失败，请检查输入'); return; }
+
+  if (isEditMode) {
+    const c = appState.contracts[setupTargetIdx];
+    if (!c || !c.isSet) return;
+
+    const oldDueDay = c.dueDay;
+
+    c.name = name;
+    c.dueDay = dueDay;
+    c.baseMonthly = r.monthly;
+    c.totalPeriods = r.periods;
+
+    if (oldDueDay !== dueDay && c.nextDueDate) {
+      const next = fromISODate(c.nextDueDate);
+      let candidate = new Date(next.getFullYear(), next.getMonth(), dueDay);
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (candidate < today) {
+        candidate = new Date(candidate.getFullYear(), candidate.getMonth() + 1, dueDay);
+      }
+      c.nextDueDate = toISODate(candidate);
+    }
+  } else {
+    const contract = {
+      name: name,
+      totalDebt: amount,
+      baseMonthly: r.monthly,
+      actualSavings: 0,
+      monthlyPaid: 0,
+      arrears: 0,
+      totalPeriods: r.periods,
+      dueDay: dueDay,
+      nextDueDate: toISODate(getNextDueDateFromToday(dueDay)),
+      history: [],
+      createdAt: toISODate(new Date()),
+      isSet: true
+    };
+
+    if (setupTargetIdx < appState.contracts.length) {
+      appState.contracts[setupTargetIdx] = contract;
+    } else {
+      appState.contracts.push(contract);
+    }
+
+    appState.activeIdx = setupTargetIdx;
+  }
 
   saveAppState();
   closeSetup();
   render();
 }
 
-// ===== 重命名 =====
 function renameContract(idx) {
   const c = appState.contracts[idx];
   if (!c || !c.isSet) return;
@@ -937,11 +1567,6 @@ function renameContract(idx) {
   render();
 }
 
-function renameActive() {
-  renameContract(appState.activeIdx);
-}
-
-// ===== 删除单个合同 =====
 function deleteContract(idx) {
   const c = appState.contracts[idx];
   if (!c || !c.isSet) return;
@@ -956,6 +1581,7 @@ function deleteContract(idx) {
   } else {
     appState.activeIdx = Math.min(idx, appState.contracts.length - 1);
   }
+  completionHistoryOpen = false;
 
   saveAppState();
   render();
@@ -965,7 +1591,6 @@ function deleteActive() {
   deleteContract(appState.activeIdx);
 }
 
-// ===== 清空全部合同 =====
 function deleteAllContracts() {
   if (appState.contracts.length === 0) return;
 
@@ -975,12 +1600,111 @@ function deleteAllContracts() {
 
   appState.contracts = [];
   appState.activeIdx = -1;
+  completionHistoryOpen = false;
 
   saveAppState();
   render();
 }
 
-// ===== 还款 =====
+function exportData() {
+  if (appState.contracts.length === 0) {
+    alert('当前没有合同可导出');
+    return;
+  }
+
+  const payload = {
+    app: 'repay-simulator',
+    version: 20,
+    exportedAt: new Date().toISOString(),
+    appState: appState
+  };
+
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const today = new Date();
+  const ts = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+  const fileName = `repay-backup-${ts}.json`;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  document.getElementById('importFile').click();
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(e.target.result);
+    } catch (err) {
+      alert('文件解析失败：不是有效的 JSON');
+      return;
+    }
+
+    let imported;
+    if (parsed && parsed.appState && Array.isArray(parsed.appState.contracts)) {
+      imported = parsed.appState;
+    } else if (parsed && Array.isArray(parsed.contracts)) {
+      imported = parsed;
+    } else {
+      alert('文件格式不对：找不到合同数据');
+      return;
+    }
+
+    const list = imported.contracts.filter(c => c && c.isSet);
+    if (list.length === 0) {
+      alert('文件里没有有效合同');
+      return;
+    }
+
+    const ok = confirm(
+      `准备导入 ${list.length} 个合同。\n\n` +
+      `当前已有的 ${appState.contracts.length} 个合同会被覆盖。\n\n` +
+      `继续？`
+    );
+    if (!ok) return;
+
+    const normalized = list.map(c => ({
+      name: String(c.name || '未命名').slice(0, 20),
+      totalDebt: Number(c.totalDebt) || 0,
+      baseMonthly: Number(c.baseMonthly) || 0,
+      actualSavings: Number(c.actualSavings) || 0,
+      monthlyPaid: Number(c.monthlyPaid) || 0,
+      arrears: Number(c.arrears) || 0,
+      totalPeriods: Number(c.totalPeriods) || 1,
+      dueDay: Number(c.dueDay) || 18,
+      nextDueDate: c.nextDueDate || toISODate(getNextDueDateFromToday(Number(c.dueDay) || 18)),
+      history: Array.isArray(c.history) ? c.history : [],
+      createdAt: c.createdAt || (Array.isArray(c.history) && c.history.length ? c.history[0].date : toISODate(new Date())),
+      isSet: true
+    }));
+
+    appState.contracts = normalized;
+    appState.activeIdx = normalized.length ? 0 : -1;
+    completionHistoryOpen = false;
+
+    saveAppState();
+    render();
+    alert(`导入成功，共 ${normalized.length} 个合同。`);
+  };
+  reader.readAsText(file);
+}
+
+// ===== 还款（修复 bug：统一用 actualDeposit） =====
 function deposit() {
   const idx = appState.activeIdx;
   const c = appState.contracts[idx];
@@ -994,40 +1718,62 @@ function deposit() {
     return;
   }
 
+  // 实际扣款金额，不超过剩余债务
   const actualDeposit = Math.min(amount, c.totalDebt);
-  const required = Math.min(c.baseMonthly + c.arrears, c.totalDebt);
-  const newPaid = c.monthlyPaid + amount;
+  const isCapped = amount > actualDeposit;
 
-  const ok = confirm(
-    `【${c.name}】\n\n` +
-    `请确认：你已经在现实中向储蓄卡存入了 ${formatMoney(amount)} 元？\n\n` +
-    `本期累计已还：${formatMoney(newPaid)} 元\n` +
-    `本期最低：${formatMoney(required)} 元\n` +
-    `剩余债务：${formatMoney(Math.max(0, c.totalDebt - actualDeposit))} 元\n\n` +
-    `这是你对自己的承诺，请勿虚假确认。`
-  );
+  let msg = `【${c.name}】\n\n`;
+  if (isCapped) {
+    msg += `输入金额 ${formatMoney(amount)} 元超过剩余债务，将按 ${formatMoney(actualDeposit)} 元执行。\n\n`;
+  }
+  msg +=
+    `还款金额：${formatMoney(actualDeposit)} 元\n` +
+    `还款后剩余：${formatMoney(Math.max(0, c.totalDebt - actualDeposit))} 元\n\n` +
+    `确认划扣？`;
+
+  const ok = confirm(msg);
   if (!ok) return;
 
+  // 所有字段都用 actualDeposit，保持数据一致
   c.totalDebt -= actualDeposit;
   c.actualSavings += actualDeposit;
-  c.monthlyPaid += amount;
+  c.monthlyPaid += actualDeposit;
   if (c.totalDebt < 0) c.totalDebt = 0;
 
-  c.history.push({ date: toISODate(new Date()), amount: amount });
+  c.history.push({ date: toISODate(new Date()), amount: actualDeposit });
 
   input.value = '';
 
   saveAppState();
   render();
-
-  if (c.totalDebt === 0) {
-    setTimeout(() => {
-      alert(`🎉「${c.name}」契约完成！\n\n你在这个过程中，现实中真实存下了 ${formatMoney(c.actualSavings)} 元。`);
-    }, 300);
-  }
 }
 
-// ===== 启动 =====
+// ===== 提前还清 =====
+function payOffAll() {
+  const idx = appState.activeIdx;
+  const c = appState.contracts[idx];
+  if (!c || !c.isSet || c.totalDebt <= 0) return;
+
+  const amount = c.totalDebt;
+
+  const ok = confirm(
+    `【${c.name}】\n\n` +
+    `提前还清剩余债务：${formatMoney(amount)} 元\n` +
+    `还清后债务归零，进入完成页\n\n` +
+    `确认划扣？`
+  );
+  if (!ok) return;
+
+  c.actualSavings += amount;
+  c.totalDebt = 0;
+  c.monthlyPaid = 0;
+  c.arrears = 0;
+  c.history.push({ date: toISODate(new Date()), amount: amount });
+
+  saveAppState();
+  render();
+}
+
 loadAppState();
 render();
 setInterval(render, 60 * 1000);
